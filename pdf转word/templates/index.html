@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 转 Word</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .box {
+            background: #fff;
+            width: 100%;
+            max-width: 700px;
+            border-radius: 20px;
+            padding: 44px 40px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 32px;
+            color: #1e293b;
+        }
+
+        .row {
+            margin-bottom: 20px;
+        }
+
+        .row-label {
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-text {
+            flex: 1;
+            height: 46px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 0 14px;
+            font-size: 14px;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .input-text:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-select {
+            height: 46px;
+            padding: 0 16px;
+            border-radius: 12px;
+            border: none;
+            background: #e2e8f0;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-select:hover {
+            background: #d1d5db;
+        }
+
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            margin: 26px 0 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #2563eb;
+            border-radius: 99px;
+            transition: width 0.3s;
+        }
+
+        .btn-submit {
+            width: 100%;
+            height: 50px;
+            border-radius: 14px;
+            background: #2563eb;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-submit:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 35px;
+            font-size: 13px;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        /* 手机自适应（安全稳定版）*/
+        @media (max-width: 520px) {
+            .box {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="title">PDF 转 Word 转换工具</div>
+
+        <div class="row">
+            <div class="row-label">PDF 文件</div>
+            <div class="input-group">
+                <input type="text" class="input-text" id="pdfName" placeholder="请选择文件" readonly>
+                <button class="btn-select" onclick="pdfInput.click()">选择文件</button>
+                <input type="file" id="pdfInput" accept=".pdf" hidden>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="row-label">保存位置</div>
+            <div class="input-group">
+                <input type="text" class="input-text" id="savePath" placeholder="默认下载目录" readonly>
+                <button class="btn-select" onclick="pathInput.click()">选择位置</button>
+                <input type="file" id="pathInput" webkitdirectory directory hidden>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="row-label">保存名称</div>
+            <input type="text" class="input-text" id="fileName" placeholder="输入文档名称">
+        </div>
+
+        <div class="progress" id="progressBox">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <button class="btn-submit" id="submitBtn">开始转换</button>
+
+        <div class="footer">© 2026 Designed by YHY</div>
+    </div>
+
+    <script>
+        const pdfInput = document.getElementById('pdfInput');
+        const pdfName = document.getElementById('pdfName');
+        const pathInput = document.getElementById('pathInput');
+        const savePath = document.getElementById('savePath');
+        const fileName = document.getElementById('fileName');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressBox = document.getElementById('progressBox');
+        const progressBar = document.getElementById('progressBar');
+
+        pdfInput.addEventListener('change', () => {
+            if (pdfInput.files.length) {
+                let name = pdfInput.files[0].name;
+                pdfName.value = name;
+                fileName.value = name.replace(/\.pdf$/i, '');
+            }
+        });
+
+        pathInput.addEventListener('change', () => {
+            if (pathInput.files.length) {
+                savePath.value = "已选择保存文件夹";
+            }
+        });
+
+        submitBtn.addEventListener('click', () => {
+            if (!pdfInput.files.length) {
+                alert('请选择PDF文件');
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = '转换中...';
+            progressBox.style.display = 'block';
+
+            let width = 0;
+            const timer = setInterval(() => {
+                width += 2;
+                progressBar.style.width = width + '%';
+                if (width >= 100) {
+                    clearInterval(timer);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
